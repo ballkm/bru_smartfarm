@@ -25,7 +25,7 @@ SECRET_KEY = 'p-wboiq(wl++$%h6=ei^jn_2f5!0to^2^$1^&*^j#^s(4df8z#'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['']
 
 
 # Application definition
@@ -132,3 +132,8 @@ STATIC_URL = '/static/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+try:
+    from local_settings import *
+except ImportError:
+    pass
