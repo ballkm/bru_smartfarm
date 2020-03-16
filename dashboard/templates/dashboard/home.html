@@ -81,7 +81,7 @@
 
             function updateChart() {
 
-                var getResponce = httpGet("http://165.22.50.134:8000/last_update/");
+                var getResponce = httpGet("http://165.22.50.134/last_update/");
                 var getResponceJson = JSON.parse(getResponce);
                 var last_temp = dataPoints1[0];
                 var last_update_time = new Date(getResponceJson.time);
