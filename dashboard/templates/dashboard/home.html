@@ -81,7 +81,7 @@
 
             function updateChart() {
 
-                var getResponce = httpGet("http://www.codata.work/last_update/");
+                var getResponce = httpGet("{% url 'last_update' %}");
                 var getResponceJson = JSON.parse(getResponce);
                 var last_temp = dataPoints1[0];
                 var last_update_time = new Date(getResponceJson.time);
