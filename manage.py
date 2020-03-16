@@ -5,7 +5,7 @@ import sys
 
 
 def main():
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bru_smatfarm.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bru_smartfarm.settings')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

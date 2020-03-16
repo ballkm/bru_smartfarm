@@ -1,5 +1,5 @@
 """
-ASGI config for bru_smatfarm project.
+ASGI config for bru_smartfarm project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bru_smatfarm.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bru_smartfarm.settings')
 
 application = get_asgi_application()
