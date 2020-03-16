@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+    <script>
+        window.onload = function () {
+
+            var dataPoints1 = [];
+            var dataPoints2 = [];
+            {% for data in home %}
+                dataPoints1.push({x: new Date("{{data.time}}"), y: {{data.temp}}})
+                dataPoints2.push({x: new Date("{{data.time}}"), y: {{data.humid}}})
+            {% endfor %}
+            var chart = new CanvasJS.Chart("chartContainer", {
+                zoomEnabled: true,
+                title: {
+                    text: "Temperature and Humidity"
+                },
+                axisX: {
+                    title: "ข้อมูลล่าสุด",
+                    valueFormatString: "H:m D-MMM-YY",
+                },
+                axisY: {
+                    maximum: 100,
+                    minimum: 0,
+                    prefix: "",
+                    includeZero: false
+                },
+                toolTip: {
+                    shared: true
+                },
+                legend: {
+                    cursor: "pointer",
+                    verticalAlign: "top",
+                    fontSize: 22,
+                    fontColor: "dimGrey",
+                    itemclick: toggleDataSeries
+                },
+                data2: [{
+
+                }],
+                data: [{
+                    type: "line",
+                    xValueType: "dateTime",
+                    yValueFormatString: "####.00",
+                    xValueFormatString: "H:m:s D-MMM-YY",
+                    showInLegend: true,
+                    color: "#B33333",
+                    name: "Temperature",
+                    dataPoints: dataPoints1
+                },
+                    {
+                        type: "line",
+                        xValueType: "dateTime",
+                        yValueFormatString: "####.00",
+                        showInLegend: true,
+                        color: "#0000CD",
+                        name: "Humidity",
+                        dataPoints: dataPoints2
+                    }
+                ]
+            });
+
+            function toggleDataSeries(e) {
+                if (typeof (e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+                    e.dataSeries.visible = false;
+                } else {
+                    e.dataSeries.visible = true;
+                }
+                chart.render();
+            }
+
+            function httpGet(theUrl) {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.open("GET", theUrl, false); // false for synchronous request
+                xmlHttp.send(null);
+                return xmlHttp.responseText;
+            }
+
+            var updateInterval = 2000;
+
+            function updateChart() {
+
+                var getResponce = httpGet("http://localhost:8000/last_update/");
+                var getResponceJson = JSON.parse(getResponce);
+                var last_temp = dataPoints1[0];
+                var last_update_time = new Date(getResponceJson.time);
+
+                if ((last_temp.x).toString() === last_update_time.toString()) {
+                    //alert("เเวลาเท่ากัน" + last_temp.x + "---------" + last_update_time);
+                    //chart.options.data[0].legendText = " Temperature " + dataPoints1[0].y + "°C";
+                    //chart.options.data[1].legendText = " Humidity " + dataPoints2[0].y + "%";
+                    //chart.render();
+                    //chart.options.data[0].legendText = " Temperature " + (dataPoints1[0].y).toString() + "°C";
+                    //chart.options.data[1].legendText = " Humidity " + (dataPoints2[0].y).toString() + "%";
+                    //chart.render();
+                } else {
+                    //alert("เวลาไม่เท่ากัน" + last_temp.x + "---------" + last_update_time);
+                    dataPoints1.pop();
+                    dataPoints2.pop();
+                    dataPoints1.unshift({
+                        x: new Date((getResponceJson.time).toString()),
+                        y: parseFloat(getResponceJson.temp)
+                    });
+                    dataPoints2.unshift({
+                        x: new Date((getResponceJson.time).toString()),
+                        y: parseFloat(getResponceJson.humid)
+                    });
+                }
+
+                // updating legend text with  updated with y Value
+                //var last_temp = last(dataPoints1);
+                //var last_humid = Object.keys(dataPoints2);
+                //var datalength =  dataPoints1.length;
+                // var last_temp = dataPoints1[0];
+                //var last_humid = dataPoints2[0];
+                //alert(last_temp.y);
+                chart.options.data[0].legendText = " Temperature " + (dataPoints1[0].y).toString() + "°C";
+                chart.options.data[1].legendText = " Humidity " + (dataPoints2[0].y).toString() + "%";
+                chart.render();
+            }
+
+            // generates first set of dataPoints
+            updateChart();
+            setInterval(function () {
+                updateChart()
+            }, updateInterval);
+        }
+    </script>
+    <br/>
+    <div id="chartContainer" style="height: 370px; width: 100%;"></div>
+    <br/>
+    <h2>Data Table</h2>
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+            <tr>
+                <th>Time</th>
+                <th>Temp</th>
+                <th>Humid</th>
+                <th>Relay Manual</th>
+                <th>Relay Timer</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for data in home %}
+                <tr>
+                    <td>{{ data.time }}</td>
+                    <td>{{ data.temp }}</td>
+                    <td>{{ data.humid }}</td>
+                    <td>{{ data.sm }}</td>
+                    <td>{{ data.st }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+{% endblock %}
+
+

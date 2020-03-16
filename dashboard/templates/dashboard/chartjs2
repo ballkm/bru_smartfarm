@@ -1,0 +1,106 @@
+<script>
+    window.onload = function () {
+
+        var dataPoints1 = [];
+        var dataPoints2 = [];
+
+        var chart = new CanvasJS.Chart("chartContainer", {
+            zoomEnabled: true,
+            title: {
+                text: "Temperature and Humidity"
+            },
+            axisX: {
+                title: "chart updates every 1 secs",
+                valueFormatString: "H:m D-MMM-YY",
+            },
+            axisY: {
+                prefix: "s",
+                includeZero: false
+            },
+            toolTip: {
+                shared: true
+            },
+            legend: {
+                cursor: "pointer",
+                verticalAlign: "top",
+                fontSize: 22,
+                fontColor: "dimGrey",
+                itemclick: toggleDataSeries
+            },
+            data: [{
+                type: "line",
+                xValueType: "dateTime",
+                yValueFormatString: "####.00",
+                xValueFormatString: "H:m:s D-MMM-YY",
+                showInLegend: true,
+                name: "Temperature",
+                dataPoints: dataPoints1
+            },
+                {
+                    type: "line",
+                    xValueType: "dateTime",
+                    yValueFormatString: "####.00",
+                    showInLegend: true,
+                    name: "Humidity",
+                    dataPoints: dataPoints2
+                }]
+        });
+
+        function toggleDataSeries(e) {
+            if (typeof (e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+                e.dataSeries.visible = false;
+            } else {
+                e.dataSeries.visible = true;
+            }
+            chart.render();
+        }
+
+        function httpGet(theUrl) {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("GET", theUrl, false); // false for synchronous request
+            xmlHttp.send(null);
+            return xmlHttp.responseText;
+        }
+
+        var updateInterval = 2000;
+        {% for data in home %}
+            dataPoints1.push({x: new Date("{{data.time}}"), y: {{data.temp}}})
+            dataPoints2.push({x: new Date("{{data.time}}"), y: {{data.humid}}})
+        {% endfor %}
+
+        function updateChart() {
+
+            var getResponce = httpGet("http://127.0.0.1:8000/last_update/");
+            var getResponceJson = JSON.parse(getResponce);
+            var last_temp = dataPoints1[0];
+            var last_update_time = new Date(getResponceJson.time);
+
+            if (last_temp.x.toString() == last_update_time.toString()) {
+                //alert("เเวลาเท่ากัน" + last_temp.x + "---------" + last_update_time);
+                //chart.options.data[0].legendText = " Temperature " + dataPoints1[0].y + "°C";
+                //chart.options.data[1].legendText = " Humidity " + dataPoints2[0].y + "%";
+                //chart.render();
+            } else {
+                //alert("เวลาไม่เท่ากัน" + last_temp.x + "---------" + last_update_time);
+
+            }
+
+            // updating legend text with  updated with y Value
+            //var last_temp = last(dataPoints1);
+            //var last_humid = Object.keys(dataPoints2);
+            //var datalength =  dataPoints1.length;
+            // var last_temp = dataPoints1[0];
+            //var last_humid = dataPoints2[0];
+            //alert(last_temp.y);
+            dataPoints1.push({x: new Date(getResponceJson.time), y: getResponceJson.temp});
+            dataPoints2.push({x: new Date(getResponceJson.time), y: getResponceJson.temp});
+            chart.options.data[0].legendText = " Temperature " + dataPoints1[0].y + "°C";
+            chart.options.data[1].legendText = " Humidity " + dataPoints2[0].y + "%";
+            chart.render();
+        }
+
+
+        // generates first set of dataPoints
+        updateChart();
+    }
+</script>
